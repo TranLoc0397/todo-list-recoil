@@ -1,12 +1,11 @@
 body {
-  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #63bbff4a;
-  background-image: url("https://img.freepik.com/free-vector/gradient-blur-pink-blue-abstract-background_53876-117324.jpg?w=1060&t=st=1694444003~exp=1694444603~hmac=e02543f84e5255a3af4019412432a4310506ab2ca16a96aab0c5d3532e3903ae");
+  background: rgb(201,241,227);
+  background: linear-gradient(90deg, rgba(201,241,227,0.9948354341736695) 0%, rgba(130,182,244,1) 100%);
 }
 
 code {
