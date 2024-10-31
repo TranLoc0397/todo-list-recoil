@@ -6,7 +6,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ![React Todo App](https://raw.githubusercontent.com/TranLoc0397/todo-list-recoil/main/public/React-App.png)
 
-
+Demo: https://sprightly-donut-e70566.netlify.app/
 ## Build Setup
 
 ``` bash
