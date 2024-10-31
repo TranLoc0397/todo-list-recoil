@@ -1,24 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Checkbox, List, Progress } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { todoListState, todoItemInfo } from "../state/atom";
 import TodoForm from "./TodoForm";
-import { removeItemAtIndex, replaceItemAtIndex } from "../common/function";
 import FilterForm from "./FilterForm";
 import { filteredTodoListState, todoListStatsState } from "../state/selector";
+import { DB } from "../db-connect/firebase";
+import firebase from "firebase";
 
-export default function TodoList() {
+const TodoList = () => {
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = useState(false)
   const todoListFilter = useRecoilValue(filteredTodoListState);
-  const [todoList, setTodoList] = useRecoilState(todoListState);
+  const setTodoList = useSetRecoilState(todoListState);
   const setTodoInfo = useSetRecoilState(todoItemInfo);
   const { percentCompleted } = useRecoilValue(todoListStatsState);
 
-  const handleRemove = (item) => {
-    let index = todoList.findIndex((value) => item.id === value.id);
-    const newList = removeItemAtIndex(todoList, index);
-    setTodoList(newList);
+  useEffect(() => {
+    const getData = async () => {
+    
+      DB.collection("todos")
+        .orderBy("time", "desc")
+        .onSnapshot((snapshot) => {
+          setTodoList(snapshot.docs.map((doc) => {
+            let info =  doc.data()
+            return {
+              id: doc.id,
+              ...info
+            }
+          }));
+        });
+        setLoading(false)
+    };
+    setLoading(true)
+    getData();
+  }, []);
+
+  const handleRemove = (todo) => {
+    DB.collection('todos').doc(todo.id).delete();
   };
 
   const handleCloseModal = () => {
@@ -33,13 +53,14 @@ export default function TodoList() {
   };
 
   const handleCompleted = (item) => {
-    let list = JSON.parse(JSON.stringify(todoList));
-    let index = list.findIndex((value) => item.id === value.id);
-    let newArr = replaceItemAtIndex(list, index, {
-      ...item,
-      isComplete: !item.isComplete,
-    });
-    setTodoList(() => newArr);
+    DB.collection('todos').doc(item.id).set(
+      {
+        ...item, 
+        isComplete: !item.isComplete,
+        time: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    )
   };
 
   return (
@@ -59,10 +80,10 @@ export default function TodoList() {
       <FilterForm />
       <Progress percent={percentCompleted.toFixed(0)} />
       <List
+        loading={loading}
         header={<div>List</div>}
         itemLayout="horizontal"
         pagination={{
-          // hideOnSinglePage: true,
           onChange: (page) => {
             console.log(page);
           },
@@ -122,3 +143,4 @@ export default function TodoList() {
     </Card>
   );
 }
+export default TodoList;

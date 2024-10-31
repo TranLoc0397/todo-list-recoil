@@ -6,7 +6,7 @@ const App = () => {
   return (
     <div id="app">
       <div className="to-do-card">
-      <TodoList />
+      <TodoList/>
       </div>
     </div>
   );

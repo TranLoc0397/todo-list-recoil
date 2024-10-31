@@ -1,37 +1,40 @@
 import React from "react";
 import { Form, Input, Modal } from "antd";
 import { useRecoilState } from "recoil";
-import { todoListState, todoItemInfo } from "../state/atom";
-import { replaceItemAtIndex } from "../common/function";
+import { todoItemInfo } from "../state/atom";
+import { DB } from "../db-connect/firebase";
+import firebase from "firebase";
 
 export default function TodoForm({ open, handleCloseModal }) {
-  const [todoList, setTodoList] = useRecoilState(todoListState);
   const [itemInfo] = useRecoilState(todoItemInfo);
   const [form] = Form.useForm();
   form.setFieldsValue({ ...itemInfo });
+  const toDate = () => {
+    let date = new Date();
+    const today = date.toDateString();
+    return today;
+  };
 
   const handelSubmit = (values) => {
-    let list = JSON.parse(JSON.stringify(todoList));
-    let newArr = [];
     if (itemInfo?.type !== "add") {
-      let index = list.findIndex((value) => itemInfo.id === value.id);
-      newArr = replaceItemAtIndex(list, index, { ...itemInfo, ...values });
-    } else {
-      newArr = [
-        ...list,
+      DB.collection('todos').doc(itemInfo.id).set(
         {
-          id: list[list.length - 1]?.id + 1,
-          icon:
-            "https://xsgames.co/randomusers/avatar.php?g=pixel&key=" +
-            list[list.length - 1]?.id +
-            1,
-          title: values.title,
-          description: values.description,
-          isComplete: false,
+          ...itemInfo, 
+          ...values,
+          time: firebase.firestore.FieldValue.serverTimestamp(),
         },
-      ];
+        { merge: true }
+      );
+    } else {
+      let newItem = {
+        time: firebase.firestore.FieldValue.serverTimestamp(),
+        date: toDate(),
+        title: values.title,
+        description: values.description,
+        isComplete: false,
+      }
+      DB.collection('todos').add(newItem);
     }
-    setTodoList(() => newArr);
     handleCloseModal();
   };
 
